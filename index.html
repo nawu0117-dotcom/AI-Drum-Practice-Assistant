@@ -4,51 +4,59 @@
 
 <head>
 
-<title>Drum Practice Tool</title>
+<title>Drum Learning Tool</title>
 
 <style>
 
 body{
 
-font-family: Arial;
+font-family:Arial;
 
-background:#0f172a;
-
-color:white;
+background:#f1f5f9;
 
 text-align:center;
 
 }
 
+.container{
+
+width:70%;
+
+max-width:900px;
+
+margin:auto;
+
+}
+
 .card{
 
-background:#1e293b;
+background:white;
 
-padding:25px;
+padding:30px;
 
-margin:30px auto;
-
-width:500px;
+margin:25px;
 
 border-radius:15px;
 
-box-shadow:0 0 20px black;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
 
 }
 
 button{
 
-background:#38bdf8;
+background:#2563eb;
+
+color:white;
 
 border:none;
 
 padding:12px;
 
-margin:6px;
-
-font-size:16px;
+margin:8px;
 
 border-radius:8px;
+
+font-size:16px;
 
 cursor:pointer;
 
@@ -56,13 +64,19 @@ cursor:pointer;
 
 button:hover{
 
-background:#0284c7;
+background:#1d4ed8;
 
 }
 
 h1{
 
-color:#38bdf8;
+color:#1e3a8a;
+
+}
+
+.slider{
+
+width:60%;
 
 }
 
@@ -72,13 +86,19 @@ color:#38bdf8;
 
 <body>
 
-<h1>AI Drum Practice Tool</h1>
+<h1>
+
+Drum Practice Learning Tool
+
+</h1>
 
 <p>
 
-AI協助設計的爵士鼓初學者練習工具
+AI輔助設計的爵士鼓初學者學習工具
 
 </p>
+
+<div class="container">
 
 <div class="card">
 
@@ -98,27 +118,21 @@ Bass：1、3
 
 </p>
 
-<p id="tip">
-
-練習重點：保持穩定
-
-</p>
-
-<button onclick="practice1()">
+<button onclick="basic()">
 
 基礎節奏
 
 </button>
 
-<button onclick="practice2()">
+<button onclick="coord()">
 
 協調練習
 
 </button>
 
-<button onclick="practice3()">
+<button onclick="fill()">
 
-過門練習
+過門
 
 </button>
 
@@ -134,37 +148,41 @@ Bass：1、3
 
 <p>
 
-BPM:
+BPM：
 
 <span id="bpm">
 
-60
+80
 
 </span>
 
 </p>
 
-<button onclick="down()">
+<input
 
--
+type="range"
 
-</button>
+min="40"
 
-<button onclick="up()">
+max="200"
 
-+
+value="80"
 
-</button>
+class="slider"
+
+oninput="changeBPM(this.value)"
+
+>
 
 <br><br>
 
-<button onclick="start()">
+<button onclick="startMet()">
 
 Start
 
 </button>
 
-<button onclick="stop()">
+<button onclick="stopMet()">
 
 Stop
 
@@ -172,93 +190,155 @@ Stop
 
 </div>
 
+<div class="card">
+
+<h2>
+
+練習計時器
+
+</h2>
+
+<p id="time">
+
+0 秒
+
+</p>
+
+<button onclick="startTimer()">
+
+開始練習
+
+</button>
+
+<button onclick="stopTimer()">
+
+結束
+
+</button>
+
+</div>
+
+</div>
+
 <script>
 
-let bpm=60
+let bpm=80
 
-let timer
+let met
 
-function up(){
-
-bpm+=5
-
-document.getElementById("bpm").innerHTML=bpm
-
-}
-
-function down(){
-
-bpm-=5
-
-document.getElementById("bpm").innerHTML=bpm
-
-}
-
-function start(){
-
-let speed=60000/bpm
-
-timer=setInterval(click,speed)
-
-}
-
-function stop(){
-
-clearInterval(timer)
-
-}
+let audioCtx=new(window.AudioContext)
 
 function click(){
 
-let sound=new Audio(
+let osc=audioCtx.createOscillator()
 
-"https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
+let gain=audioCtx.createGain()
+
+osc.connect(gain)
+
+gain.connect(audioCtx.destination)
+
+osc.frequency.value=1000
+
+osc.start()
+
+gain.gain.exponentialRampToValueAtTime(
+
+0.0001,
+
+audioCtx.currentTime+0.05
 
 )
 
-sound.play()
+osc.stop(audioCtx.currentTime+0.05)
 
 }
 
-function practice1(){
+function startMet(){
+
+let interval=60000/bpm
+
+met=setInterval(click,interval)
+
+}
+
+function stopMet(){
+
+clearInterval(met)
+
+}
+
+function changeBPM(v){
+
+bpm=v
+
+document.getElementById("bpm").innerHTML=v
+
+if(met){
+
+stopMet()
+
+startMet()
+
+}
+
+}
+
+function basic(){
 
 document.getElementById("title").innerHTML="基礎8 Beat"
 
 document.getElementById("practice").innerHTML=
 
-"Hi-hat：8分音符<br>Snare：2、4<br>Bass：1、3"
-
-document.getElementById("tip").innerHTML=
-
-"練習重點：穩定節奏"
+"Hi-hat：8分<br>Snare：2、4<br>Bass：1、3"
 
 }
 
-function practice2(){
+function coord(){
 
-document.getElementById("title").innerHTML="協調練習"
+document.getElementById("title").innerHTML="協調"
 
 document.getElementById("practice").innerHTML=
 
-"Hi-hat：8分<br>Snare：2、4<br>Bass：1、3&"
-
-document.getElementById("tip").innerHTML=
-
-"練習重點：手腳同步"
+"Hi-hat 8分<br>Snare 2、4<br>Bass 1、3&"
 
 }
 
-function practice3(){
+function fill(){
 
-document.getElementById("title").innerHTML="過門練習"
+document.getElementById("title").innerHTML="過門"
 
 document.getElementById("practice").innerHTML=
 
 "Snare 1 2 3 4"
 
-document.getElementById("tip").innerHTML=
+}
 
-"練習重點：回到節奏"
+let time=0
+
+let timer
+
+function startTimer(){
+
+timer=setInterval(function(){
+
+time++
+
+document.getElementById("time").innerHTML=
+
+time+" 秒"
+
+},1000)
+
+}
+
+function stopTimer(){
+
+clearInterval(timer)
+
+time=0
+
+document.getElementById("time").innerHTML="0 秒"
 
 }
 
